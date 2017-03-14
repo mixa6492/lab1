@@ -51,7 +51,7 @@ signal	cnt2 : STD_LOGIC_VECTOR(25 DOWNTO 0);
 signal	cnt3 : STD_LOGIC_VECTOR(25 DOWNTO 0);
 signal	cnt4 : STD_LOGIC_VECTOR(25 DOWNTO 0);
 signal	one_sec: std_logic;
-
+signal 	rst_in:STD_LOGIC;
 BEGIN
 
 -- DODATI:
@@ -60,14 +60,31 @@ BEGIN
 
 
 -- Registar
+rst_in<=not(rst_i);
 r1: reg PORT MAP (
                 i_clk  => clk_i,
-                in_rst => not(rst_i),
+                in_rst => rst_in,
                 i_d    => cnt4,
                 o_q   => cnt
                 );
 --Sabirac
 cnt1<=cnt+1;
-
+--MUX1
+with one_sec select
+cnt2<= 
+		"00000000000000000000000000" when '1',
+		cnt1 when others;
+--MUX2
+with cnt_en_i select
+cnt3 <=
+		cnt when '0',
+		cnt2 when others;
+--MUX3
+with cnt_rst_i select
+cnt4 <=
+		cnt3 when '0',
+		"00000000000000000000000000" when others;
+--Out
+one_sec_o<=one_sec;
 
 END rtl;
